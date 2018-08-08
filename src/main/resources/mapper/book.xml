@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="book">
+    <insert id="create" parameterType="book" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO db.book
+            VALUE (NULL, #{title}, #{price}, #{amount}, #{pubTime}, #{userId})
+    </insert>
+
+    <select id="queryBooksByUserId" parameterType="int" resultType="book">
+        SELECT *
+        FROM db.book
+        WHERE userId = #{userId}
+    </select>
+
+    <select id="queryById" parameterType="long" resultType="book">
+        SELECT *
+        FROM db.book
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="book">
+        UPDATE db.book
+        SET
+            title   = #{title},
+            price   = #{price},
+            amount  = #{amount},
+            pubTime = #{pubTime},
+            userId  = #{userId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="remove" parameterType="long">
+        DELETE
+        FROM db.book
+        WHERE id = #{id}
+    </delete>
+
+    <select id="queryAll" resultType="book">
+        SELECT *
+        FROM db.book
+        ORDER BY id DESC
+    </select>
+
+    <resultMap id="queryUserByBookId_map" type="book">
+        <result property="title" column="title"/>
+        <result property="price" column="price"/>
+        <result property="amount" column="amount"/>
+        <result property="pubTime" column="pubTime"/>
+        <association property="user" javaType="user">
+            <result property="username" column="username"/>
+        </association>
+    </resultMap>
+    <select id="queryUserByBookId" resultMap="queryUserByBookId_map">
+        SELECT
+            b.title,
+            b.price,
+            b.amount,
+            b.pubTime,
+            u.username
+        FROM db.book AS b INNER JOIN db.user AS u
+                ON b.userId = u.id
+        WHERE b.id = #{id}
+    </select>
+</mapper>    

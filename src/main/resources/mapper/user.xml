@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+    <insert id="create" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO db.user (username, password, avatar)
+            VALUE (#{username}, md5(#{password}), #{avatar})
+    </insert>
+    <select id="queryByUsername" parameterType="user" resultType="user">
+        SELECT *
+        FROM db.user
+        WHERE username = #{username}
+    </select>
+    <select id="queryAll" resultType="user">
+        SELECT *
+        FROM db.user
+        ORDER BY id DESC;
+    </select>
+
+    <resultMap id="queryAllUsers_map" type="user">
+        <result property="username" column="username"/>
+        <collection property="books" ofType="book">
+            <result property="title" column="title"/>
+            <result property="price" column="price"/>
+            <result property="amount" column="amount"/>
+            <result property="pubTime" column="pubTime"/>
+        </collection>
+    </resultMap>
+    <select id="queryAllUsers" resultMap="queryAllUsers_map">
+        SELECT
+            u.username,
+            b.title,
+            b.price,
+            b.amount,
+            b.pubTime
+        FROM db.user AS u LEFT OUTER JOIN db.book b
+                ON u.id = b.userId
+    </select>
+
+    <select id="queryById" parameterType="int" resultType="user">
+        SELECT *
+        FROM db.user
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="user">
+        UPDATE db.user
+        SET
+            username  = #{username},
+            password  = #{password},
+            addressId = #{addressId}
+        WHERE id = #{id}
+    </update>
+
+    <resultMap id="userAddress_map" type="user">
+        <result property="username" column="username"/>
+        <association property="address" javaType="address">
+            <result property="detail" column="detail"/>
+        </association>
+    </resultMap>
+    <select id="userAddress" parameterType="int" resultMap="userAddress_map">
+        SELECT
+            u.username,
+            a.detail
+        FROM db.user AS u LEFT OUTER JOIN db.address AS a
+                ON u.id = a.userId
+        WHERE u.id = #{id}
+    </select>
+</mapper>
